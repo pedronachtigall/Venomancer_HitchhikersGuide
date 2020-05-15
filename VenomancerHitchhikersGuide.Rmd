@@ -1,5 +1,5 @@
 ---
-title: 'Venomancer: The Hitchhikers Guide to Venom Gland Transcriptomics'
+title: 'The Hitchhikers Guide to Venom Gland Transcriptomics'
 author: Pedro G. Nachtigall, Rhett M. Rautsaw, Schyler Ellsworth, Andrew J. Mason,
   Darin R. Rokyta, Christopher L. Parkinson, Inácio L.M. Junqueira-de-Azevedo
 date: "`r Sys.Date()`"
@@ -19,7 +19,7 @@ output:
 ![](./figures/venomancer_logo.png)
 
 # Introduction
-The Hitchhiker's Guide to Venom Gland Transcriptomics is designed to walk you through our recommended bioinformatic pipeline. If you are new to bioinformatics, don't panic! There are some resources and information provided at the beginning of the document to get you through the basics. Overall, The topics covered in this guideline include:
+The Hitchhiker's Guide to Venom Gland Transcriptomics is part of [Venomancer](https://github.com/pedronachtigall/Venomancer) and designed to walk you through our recommended bioinformatic pipeline. If you are new to bioinformatics, don't panic! There are some resources and information provided at the beginning of the document to get you through the basics. Overall, The topics covered in this guideline include:
 
 - Basic bioinformatics
 - Raw data processing
@@ -866,5 +866,5 @@ table<-head(table[complete.cases(table),c(1,5)])
 
 ```{bash, eval=F, echo=F}
 library(rmarkdown)
-render("VenomancerHitchhikersGuide.Rmd",output_file="README.md", md_document(variant = "markdown_github", toc=T, toc_depth=2))
+render("VenomancerHitchhikersGuide.Rmd",output_file="README_new.md", md_document(variant = "markdown_github", toc=T, toc_depth=2))
 ```

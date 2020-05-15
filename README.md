@@ -1,9 +1,10 @@
 ![](./figures/venomancer_logo.png)
 
-# Venomancer: The Hitchhikers Guide to Venom Gland Transcriptomics
+# The Hitchhiker's Guide to Venom Gland Transcriptomics
 ### Pedro G. Nachtigall, Rhett M. Rautsaw, Schyler Ellsworth, Andrew J. Mason, Darin R. Rokyta, Christopher L. Parkinson, Inácio L.M. Junqueira-de-Azevedo
 
 # Table of Contents
+
 -   [Introduction](#introduction)
 -   [Basic Bioinformatics](#basic-bioinformatics)
     -   [Training Resources](#training-resources)
@@ -27,11 +28,12 @@
 Introduction
 ============
 
-The Hitchhiker’s Guide to Venom Gland Transcriptomics is designed to
-walk you through our recommended bioinformatic pipeline. If you are new
-to bioinformatics, don’t panic! There are some resources and information
-provided at the beginning of the document to get you through the basics.
-Overall, The topics covered in this guideline include:
+The Hitchhiker’s Guide to Venom Gland Transcriptomics is part of
+[Venomancer](https://github.com/pedronachtigall/Venomancer) and designed
+to walk you through our recommended bioinformatic pipeline. If you are
+new to bioinformatics, don’t panic! There are some resources and
+information provided at the beginning of the document to get you through
+the basics. Overall, The topics covered in this guideline include:
 
 -   Basic bioinformatics
 -   Raw data processing
