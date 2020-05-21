@@ -1,9 +1,11 @@
 # Venom Transcriptome Plotting Functions & Colors
-# Functions by: Andrew J. Mason & Rhett M. Rautsaw
+# Functions by: Rhett M. Rautsaw
 
 library(RColorBrewer)
 library(ggpubr)
 library(patchwork)
+library(compositions)
+library(dplyr)
 
 toxin_colors<-c("#d30b94","3FTx",
                 "#201923","BPP",
@@ -129,77 +131,40 @@ FancyFigure <- function(df=TPM_df2,id="Average",class="class",toxin_class="toxin
 }
 
 ## Pairwise scatterplot of clr transformed expression data
-TransCompPlot<-function(dat,x,y){
-  clr_dat <- data.frame(cbind(dat[,1],dat[,x],dat[,y]))
-  for (i in 2:3){
-    clr_dat[,i] <- as.numeric(as.character(clr_dat[,i]))}
-  rownames(clr_dat) = clr_dat[,1 ] # the first row will be the header
-  clr_dat = clr_dat[,-1]
-  colnames(clr_dat) = c(colnames(dat[x]),colnames(dat[y]))
-  clr_dat <- t(clr_dat)
-  clr_dat <- clr(clr_dat)
-  clr_dat <- as.data.frame(t(clr_dat))
-  clr_dat <-cbind(dat[,2:3],clr_dat)
+TransCompPlot<-function(df=TPM_df2,id1="CLP2057", id2="CLP2065",class="class",toxin_class="toxin_class",colors=toxin_colors,print=TRUE){
+  df2<-df %>% mutate_if(is.numeric,clr)
+  Nontoxins<-df2[df2[class]=="Nontoxin",]
+  Toxins<-df2[df2[class]=="Toxin",]
   
-  Nontoxin<-subset(clr_dat,clr_dat[[1]]=="Nontoxin")
-  Toxins<-subset(clr_dat,clr_dat[[1]]=="Toxin")
+  minX<-min(df2[,c(id1,id2)])
+  maxX<-max(df2[,c(id1,id2)])
   
-  varcovar<-matrix(c(var(Nontoxin[[3]]),cov(Nontoxin[[3]],Nontoxin[[4]]),
-                     cov(Nontoxin[[4]],Nontoxin[[3]]),var(Nontoxin[[4]])),2,2)
-  e1<-eigen(varcovar)
-  s<-(2.58*(sqrt(e1$values[2])))
-  lm1<-lm(Nontoxin[[4]]~Nontoxin[[3]])
-  lm2<-lm(Toxins[[4]]~Toxins[[3]])
+  # Linear Regression
+  y=Nontoxins[[id2]]
+  x=Nontoxins[[id1]]
+  model <- lm(y~x)
   
-  R2_Non<-summary(lm1)$r.squared
-  R_non<-cor(Nontoxin[[3]],Nontoxin[[4]],method="pearson")
-  p_non<-cor(Nontoxin[[3]],Nontoxin[[4]],method="spearman")
+  # Add predictions 
+  new.x=seq(minX,maxX,by = 0.05)
+  new.y <- predict(model, data.frame(x=new.x), interval = "prediction")
+  pred.int<-as.data.frame(cbind(new.x,new.y))
+  colnames(pred.int)[1]<-c(id1)
   
-  R2_Tox<-summary(lm2)$r.squared
-  R_Tox<-cor(Toxins[[3]],Toxins[[4]],method="pearson")
-  p_Tox<-cor(Toxins[[3]],Toxins[[4]],method="spearman")
+  # Plot Nontoxins with regression line + prediction intervals
+  p <- ggscatter(Nontoxins, x=id1, y=id2, color="#8080801A",  add="reg.line", add.params = list(color="black"),fullrange = T)+
+    stat_cor(aes(label = paste("Nontoxins:",nrow(Nontoxins), ..rr.label.., ..p.label.., sep = "~` `~")))+
+    geom_line(data=pred.int,aes(y = lwr), color = "black", linetype = "dashed")+
+    geom_line(data=pred.int,aes(y = upr), color = "black", linetype = "dashed")
   
-  print("Nontoxin")
-  print(cat("n=",(length(Nontoxin[[3]]))))
-  print(cat("p=",p_non))
-  print(cat("R=",R_non))
-  print(cat("R2=",R2_Non))
-  print(" ")
-  print("Toxins")
-  print(cat("n=",(length(Toxins[[3]]))))
-  print(cat("p=",p_Tox))
-  print(cat("R=",R_Tox))
-  print(cat("R2=",R2_Tox))
+  # Add Toxins
+  p <-ggscatter(Toxins, x=id1, y=id2, color=toxin_class,  palette=toxin_colors, legend="right",ggp=p)+
+    stat_cor(data=Toxins, aes(label = paste("Toxins:",nrow(Toxins), ..rr.label.., ..p.label.., sep = "~` `~")), label.y.npc = 0.93)
   
-  MinX=min(c(min(Nontoxin[[3]]),min(Toxins[[3]])))
-  MinY=min(c(min(Nontoxin[[4]]),min(Toxins[[4]])))
-  
-  
-  ggplot(data=clr_dat, aes(x=clr_dat[[3]], y=clr_dat[[4]]))+
-    geom_point(data=Nontoxin,aes(x=Nontoxin[[3]],y=Nontoxin[[4]]),color="grey63",size=2)+
-    #geom_abline(slope=1,intercept = 0,color="black",size=1)+
-    geom_abline(slope=(lm1$coefficients[2]),intercept=lm1$coefficients[1],color="red",size=1)+
-    geom_segment(x=1.1*MinX,y=1.1*(lm1$coefficient[2]*MinX)+((lm1$coefficients[1])+s),
-                 yend=(1.1*max(clr_dat[[4]])), 
-                 xend=((1.1*max(clr_dat[[4]]))-(lm1$coefficient[1]+s))/(lm1$coefficients[2]), 
-                 size=1,linetype="dashed",alpha=0.1)+
-    geom_segment(aes(x=(1.15*(MinY-(lm1$coefficients[1]-s))/(lm1$coefficients[2])),
-                     y=1.15*MinY,xend=(1.1*max(clr_dat[[3]])),
-                     yend=(lm1$coefficients[2]*max(1.1*clr_dat[[3]]))+(lm1$coefficients[1]-s)),
-                 color="black",size=1,linetype="dashed",alpha=0.1)+
-    # geom_point(data=Toxins,aes(x=Toxins[[3]],y=Toxins[[4]],color=factor(Toxins[[2]])),
-    #            size=3)+
-    geom_point(data=Toxins,aes(x=Toxins[[3]],y=Toxins[[4]],fill=factor(Toxins[[2]])),
-               size=3,pch=21,colour="black")+
-    scale_fill_manual(values=toxin_colors, name="Toxin Class") +
-    #geom_text(data=Toxins,aes(x=Toxins[[3]],y=Toxins[[4]],label=rownames(Toxins)))+
-    labs(x=colnames(Toxins[3]),y=colnames(Toxins[4]))+
-    theme(legend.background=element_rect(colour="black"),legend.key=element_rect(colour="black",fill="white"),
-          axis.ticks.x=element_blank(),axis.ticks.y=element_blank(),
-          axis.title=element_text(size=14),
-          panel.background = element_rect(fill = "white"),line=element_line(colour="black",size=1),
-          plot.title=element_text(hjust=0.5,size=20))+
-    coord_fixed()
+  # Print plot
+  if(print==TRUE){
+    print(p)
+  }
+  if(print==FALSE){
+    return(p)
+  }
 }
-
-

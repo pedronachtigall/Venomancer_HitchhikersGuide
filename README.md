@@ -1149,21 +1149,6 @@ can easily manipulate any part of this figure using something like
 ``` r
 png("figures/TransCompPlot.png", width =480, height=480)
 TransCompPlot(TPM_df2, "CLP2057", "CLP2065")
-```
-
-    ## [1] "Nontoxin"
-    ## n= 1977NULL
-    ## p= 0.8720159NULL
-    ## R= 0.9043957NULL
-    ## R2= 0.8179316NULL
-    ## [1] " "
-    ## [1] "Toxins"
-    ## n= 62NULL
-    ## p= 0.6155725NULL
-    ## R= 0.8245036NULL
-    ## R2= 0.6798062NULL
-
-``` r
 invisible(dev.off())
 ```
 
