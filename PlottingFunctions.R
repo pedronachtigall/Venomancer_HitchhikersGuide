@@ -3,6 +3,7 @@
 
 library(RColorBrewer)
 library(ggpubr)
+library(patchwork)
 
 toxin_colors<-c("#d30b94","3FTx",
                 "#201923","BPP",
