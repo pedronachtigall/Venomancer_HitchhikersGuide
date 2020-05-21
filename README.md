@@ -1043,15 +1043,6 @@ source("./PlottingFunctions.R")
 png("figures/toxin_colors.png", width=720, height=480)
 ggbarplot(toxin_colors_df, "V2","V3", fill=toxin_colors_df$V1, width = 1, xlab="",
              ylab="", main="toxin colors") + rotate_x_text(angle = 45)
-```
-
-    ## Warning in if (fill %in% names(data)) add.params$group <- fill: the condition has length > 1 and only the first element will be
-    ## used
-
-    ## Warning in if (fill %in% names(data) & is.null(add.params$fill)) add.params$fill <- fill: the condition has length > 1 and only
-    ## the first element will be used
-
-``` r
 invisible(dev.off())
 ```
 
@@ -1152,7 +1143,7 @@ TransCompPlot(TPM_df2, "CLP2057", "CLP2065")
 invisible(dev.off())
 ```
 
-<img src="./figures/TransCompPlot.png" style="width:75.0%;height:75.0%" />
+<img src="./figures/TransCompPlot.png" style="width:75.0%;height:50.0%" />
 
 ### Heatmaps
 
@@ -1171,7 +1162,7 @@ pheatmap(TPM_df2_log_tox[,4:11], cluster_rows=T, show_rownames=F,cluster_cols=T,
 invisible(dev.off())
 ```
 
-<img src="./figures/toxin_transcript_heatmap.png" style="width:75.0%;height:75.0%" />
+<img src="./figures/toxin_transcript_heatmap.png" style="width:50.0%;height:50.0%" />
 
 ``` r
 # Toxin Classes
@@ -1183,7 +1174,7 @@ pheatmap(TPM_class_df_log_tox[,3:10], cluster_rows=F, show_rownames=T,cluster_co
 invisible(dev.off())
 ```
 
-<img src="./figures/toxin_class_heatmap.png" style="width:75.0%;height:75.0%" />
+<img src="./figures/toxin_class_heatmap.png" style="width:50.0%;height:50.0%" />
 
 ### Phylogeny Heatmap
 
@@ -1232,7 +1223,7 @@ invisible(ggscatter(PCA_df,"PC1","PC2",color="NontoxPhylo",fill="NontoxPhylo",si
 invisible(dev.off())
 ```
 
-<img src="./figures/toxin_PCA.png" style="width:75.0%;height:75.0%" />
+<img src="./figures/toxin_PCA.png" style="width:50.0%;height:50.0%" />
 
 Differential Expression
 -----------------------
