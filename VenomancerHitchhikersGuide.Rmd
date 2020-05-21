@@ -1,7 +1,6 @@
 ---
 title: 'The Hitchhikers Guide to Venom Gland Transcriptomics'
-author: Pedro G. Nachtigall, Rhett M. Rautsaw, Schyler Ellsworth, Andrew J. Mason,
-  Darin R. Rokyta, Christopher L. Parkinson, Inácio L.M. Junqueira-de-Azevedo
+author: 'Pedro G. Nachtigall, Rhett M. Rautsaw, Schyler Ellsworth, Andrew J. Mason, Darin R. Rokyta, Christopher L. Parkinson, Inácio L.M. Junqueira-de-Azevedo'
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -385,7 +384,7 @@ parallel -a list.txt -j 2 --verbose "echo {}
 ## Transcriptome Annotation
 ### Venomancer
 
-![](./figures/venomancer_pipeline.png)
+![](./figures/venomancer_pipeline.png){width=75% height=75%}
 
 [Venomancer](https://github.com/pedronachtigall/Venomancer) was designed to identify and annotate toxins from a *de novo* venom gland transcriptome assembly. This program uses `blast` and trained generalized Hidden Markov Models (gHMM) to identify toxins in our assembly and annotated them. We will then use the resulting files `Toxins_cds_Redundancyfiltered.fasta` and `PutativeToxins_cds_SPfiltered.fasta`, combining them together and appending "TOXIN" to the beginning of the fasta names. 
 ```{bash,eval=F}
@@ -657,10 +656,14 @@ rm(packages)
 source("./PlottingFunctions.R")
 ```
 
-```{r, warning=FALSE}
+```{r}
+png("figures/toxin_colors.png", width=720, height=480)
 ggbarplot(toxin_colors_df, "V2","V3", fill=toxin_colors_df$V1, width = 1, xlab="",
              ylab="", main="toxin colors") + rotate_x_text(angle = 45)
+invisible(dev.off())
 ```
+
+![](./figures/toxin_colors.png){width=50% height=50%}
 
 Now we can load our data into R and start to visualize expression of our toxins. There are sooooo many ways to visualize this data. I'm just going to go through a few here...
 
@@ -698,30 +701,30 @@ rownames(TPM_df2_log)<-TPM_df2_log$gene_id
 
 TPM_class_df_log<-TPM_class_df %>% mutate_if(is.numeric,log) # can change to clr
 TPM_class_df_log<-TPM_class_df_log[order(-TPM_class_df_log$Average),]
-rownames(TPM_class_df_log)<-TPM_class_df_log$Toxin_ID
+rownames(TPM_class_df_log)<-TPM_class_df_log$toxin_class
 ```
 
 ### Fancy Figures
 Fancy figures are a series of three different plots. You can plot them each separately...
-```{r,eval=F}
+```{r, warning=FALSE,}
 png("figures/FullTranscriptomePlot.png", width =1080, height=720)
 FullTranscriptomePlot(TPM_df2,"CLP2057",class="class")
-dev.off()
+invisible(dev.off())
 
 png("figures/ToxinBarplot.png", width =1080, height=720)
 ToxinBarplot(TPM_df2,"CLP2057",class="class",toxin_class="toxin_class", colors=toxin_colors)
-dev.off()
+invisible(dev.off())
 
 png("figures/ExpressionPie.png", width =1080, height=720)
 ExpressionPie(TPM_df2,"CLP2057",class="class",toxin_class="toxin_class", colors=toxin_colors)
-dev.off()
+invisible(dev.off())
 ```
 
 Or combine them into a Fancy Figure and loop through all your individuals. 
-```{r,eval=F}
+```{r}
 png("figures/FancyFigure.png", width =1440, height=1080)
 FancyFigure(TPM_df2,"CLP2057",class="class",toxin_class="toxin_class", colors=toxin_colors)
-dev.off()
+invisible(dev.off())
 
 #for(i in c(samples$ID,"Average")){
 #  svg(paste0(i,"_FancyFigure.svg"),width=12,height=8.5)
@@ -734,13 +737,18 @@ dev.off()
 
 I recommend exporting as `svg` or `pdf` instead of `png`, and then you can easily manipulate any part of this figure using something like [`Inkscape`](https://inkscape.org/)
 
+\pagebreak
 
 ### Transcriptome Comparison Plots
 ```{r}
+png("figures/TransCompPlot.png", width =480, height=480)
 TransCompPlot(TPM_df2, "CLP2057", "CLP2065")
+invisible(dev.off())
 ```
 
+![](./figures/TransCompPlot.png){width=75% height=75%}
 
+\pagebreak
 
 ### Heatmaps
 It may be helpful to visualize expression as a heatmap...
@@ -751,15 +759,29 @@ rownames(metadata)<-samples$ID
 # Toxin Transcripts
 TPM_df2_log_tox<-subset(TPM_df2_log,TPM_df2_log$class=="Toxin")
 rownames(TPM_df2_log_tox)<-TPM_df2_log_tox$gene_id
+png("figures/toxin_transcript_heatmap.png", width=480, height=720)
 pheatmap(TPM_df2_log_tox[,4:11], cluster_rows=T, show_rownames=F,cluster_cols=T, 
          annotation_col=metadata, annotation_legend=T)
+invisible(dev.off())
+```
 
+![](./figures/toxin_transcript_heatmap.png){width=75% height=75%}
+
+\pagebreak
+
+```{r}
 # Toxin Classes
 TPM_class_df_log_tox<-subset(TPM_class_df_log,TPM_class_df_log$class=="Toxin")
-rownames(TPM_class_df_log_tox)<-TPM_class_df_log_tox$Toxin_ID
+rownames(TPM_class_df_log_tox)<-TPM_class_df_log_tox$toxin_class
+png("figures/toxin_class_heatmap.png", width=480, height=720)
 pheatmap(TPM_class_df_log_tox[,3:10], cluster_rows=F, show_rownames=T,cluster_cols=T, 
          annotation_col=metadata, annotation_legend=T)
+invisible(dev.off())
 ```
+
+![](./figures/toxin_class_heatmap.png){width=75% height=75%}
+
+\pagebreak
 
 ### Phylogeny Heatmap
 You could also use your phylogeny as the tree for the heatmap...
@@ -767,15 +789,27 @@ You could also use your phylogeny as the tree for the heatmap...
 Tree<-read.tree(file="./example_data/tree.nwk")
 
 # Toxin Transcripts
-phylo.heatmap(Tree, t(TPM_df2_log_tox[,4:11]), fsize=c(1,0.8,1), standardize=F, 
+png("figures/toxin_transcript_phyloheatmap.png", width=720, height=480)
+phylo.heatmap(Tree, t(TPM_df2_log_tox[,4:11]), fsize=c(1,0.8,1), standardize=F, labels=F,
               split=c(0.3,0.7), ylim=c(-0.25,1.25), grid=T,
               colors=colorRampPalette(rev(brewer.pal(n = 7,name="RdYlBu")))(100))
+invisible(dev.off())
+```
 
+![](./figures/toxin_transcript_phyloheatmap.png){width=50% height=50%}
+
+```{r}
 # Toxin Classes
+png("figures/toxin_class_phyloheatmap.png", width=720, height=480)
 phylo.heatmap(Tree, t(TPM_class_df_log_tox[,3:10]), fsize=c(1,0.8,1), standardize=F, 
               split=c(0.3,0.7), ylim=c(-0.25,1.25), grid=T,
               colors=colorRampPalette(rev(brewer.pal(n = 7,name="RdYlBu")))(100))
+invisible(dev.off())
 ```
+
+![](./figures/toxin_class_phyloheatmap.png){width=50% height=50%}
+
+\pagebreak
 
 ### PCA
 What about a PCA...
@@ -783,15 +817,20 @@ What about a PCA...
 PCA <- prcomp(as.data.frame(t(clr(TPM_df2[,4:11]))), center=TRUE, scale=TRUE)
 PCA_df<-data.frame(metadata,PCA$x)
 
-plot(PCA, type='l')
-summary(PCA)
+#plot(PCA, type='l')
+#summary(PCA)
 PC1<-round((PCA$sdev^2/sum(PCA$sdev^2))*100,2)[1]
 PC2<-round((PCA$sdev^2/sum(PCA$sdev^2))*100,2)[2]
-ggscatter(PCA_df,"PC1","PC2",color="NontoxPhylo",fill="NontoxPhylo",size=8,
+png("figures/toxin_PCA.png", width=480, height=480)
+invisible(ggscatter(PCA_df,"PC1","PC2",color="NontoxPhylo",fill="NontoxPhylo",size=8,
           ellipse = T, ellipse.level = 0.95, ellipse.type = "norm",
-          xlab = paste0("PC1 (",PC1,"%)"), ylab=paste0("PC2 (",PC2,"%)"))
+          xlab = paste0("PC1 (",PC1,"%)"), ylab=paste0("PC2 (",PC2,"%)")))
+invisible(dev.off())
 ```
 
+![](./figures/toxin_PCA.png){width=75% height=75%}
+
+\pagebreak
 
 ## Differential Expression
 We can also perform differential expression analysis! Make sure to use expected counts for this!!

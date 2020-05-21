@@ -627,7 +627,7 @@ Transcriptome Annotation
 
 ### Venomancer
 
-![](./figures/venomancer_pipeline.png)
+<img src="./figures/venomancer_pipeline.png" style="width:75.0%;height:75.0%" />
 
 [Venomancer](https://github.com/pedronachtigall/Venomancer) was designed
 to identify and annotate toxins from a *de novo* venom gland
@@ -1040,11 +1040,22 @@ source("./PlottingFunctions.R")
 ```
 
 ``` r
+png("figures/toxin_colors.png", width=720, height=480)
 ggbarplot(toxin_colors_df, "V2","V3", fill=toxin_colors_df$V1, width = 1, xlab="",
              ylab="", main="toxin colors") + rotate_x_text(angle = 45)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-43-1.png)
+    ## Warning in if (fill %in% names(data)) add.params$group <- fill: the condition has length > 1 and only the first element will be
+    ## used
+
+    ## Warning in if (fill %in% names(data) & is.null(add.params$fill)) add.params$fill <- fill: the condition has length > 1 and only
+    ## the first element will be used
+
+``` r
+invisible(dev.off())
+```
+
+<img src="./figures/toxin_colors.png" style="width:50.0%;height:50.0%" />
 
 Now we can load our data into R and start to visualize expression of our
 toxins. There are sooooo many ways to visualize this data. I’m just
@@ -1090,7 +1101,7 @@ rownames(TPM_df2_log)<-TPM_df2_log$gene_id
 
 TPM_class_df_log<-TPM_class_df %>% mutate_if(is.numeric,log) # can change to clr
 TPM_class_df_log<-TPM_class_df_log[order(-TPM_class_df_log$Average),]
-rownames(TPM_class_df_log)<-TPM_class_df_log$Toxin_ID
+rownames(TPM_class_df_log)<-TPM_class_df_log$toxin_class
 ```
 
 ### Fancy Figures
@@ -1101,15 +1112,15 @@ each separately…
 ``` r
 png("figures/FullTranscriptomePlot.png", width =1080, height=720)
 FullTranscriptomePlot(TPM_df2,"CLP2057",class="class")
-dev.off()
+invisible(dev.off())
 
 png("figures/ToxinBarplot.png", width =1080, height=720)
 ToxinBarplot(TPM_df2,"CLP2057",class="class",toxin_class="toxin_class", colors=toxin_colors)
-dev.off()
+invisible(dev.off())
 
 png("figures/ExpressionPie.png", width =1080, height=720)
 ExpressionPie(TPM_df2,"CLP2057",class="class",toxin_class="toxin_class", colors=toxin_colors)
-dev.off()
+invisible(dev.off())
 ```
 
 Or combine them into a Fancy Figure and loop through all your
@@ -1118,7 +1129,7 @@ individuals.
 ``` r
 png("figures/FancyFigure.png", width =1440, height=1080)
 FancyFigure(TPM_df2,"CLP2057",class="class",toxin_class="toxin_class", colors=toxin_colors)
-dev.off()
+invisible(dev.off())
 
 #for(i in c(samples$ID,"Average")){
 #  svg(paste0(i,"_FancyFigure.svg"),width=12,height=8.5)
@@ -1136,6 +1147,7 @@ can easily manipulate any part of this figure using something like
 ### Transcriptome Comparison Plots
 
 ``` r
+png("figures/TransCompPlot.png", width =480, height=480)
 TransCompPlot(TPM_df2, "CLP2057", "CLP2065")
 ```
 
@@ -1151,7 +1163,11 @@ TransCompPlot(TPM_df2, "CLP2057", "CLP2065")
     ## R= 0.8245036NULL
     ## R2= 0.6798062NULL
 
-![](README_files/figure-markdown_github/unnamed-chunk-47-1.png)
+``` r
+invisible(dev.off())
+```
+
+<img src="./figures/TransCompPlot.png" style="width:75.0%;height:75.0%" />
 
 ### Heatmaps
 
@@ -1164,21 +1180,25 @@ rownames(metadata)<-samples$ID
 # Toxin Transcripts
 TPM_df2_log_tox<-subset(TPM_df2_log,TPM_df2_log$class=="Toxin")
 rownames(TPM_df2_log_tox)<-TPM_df2_log_tox$gene_id
+png("figures/toxin_transcript_heatmap.png", width=480, height=720)
 pheatmap(TPM_df2_log_tox[,4:11], cluster_rows=T, show_rownames=F,cluster_cols=T, 
          annotation_col=metadata, annotation_legend=T)
+invisible(dev.off())
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-48-1.png)
+<img src="./figures/toxin_transcript_heatmap.png" style="width:75.0%;height:75.0%" />
 
 ``` r
 # Toxin Classes
 TPM_class_df_log_tox<-subset(TPM_class_df_log,TPM_class_df_log$class=="Toxin")
-rownames(TPM_class_df_log_tox)<-TPM_class_df_log_tox$Toxin_ID
+rownames(TPM_class_df_log_tox)<-TPM_class_df_log_tox$toxin_class
+png("figures/toxin_class_heatmap.png", width=480, height=720)
 pheatmap(TPM_class_df_log_tox[,3:10], cluster_rows=F, show_rownames=T,cluster_cols=T, 
          annotation_col=metadata, annotation_legend=T)
+invisible(dev.off())
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-48-2.png)
+<img src="./figures/toxin_class_heatmap.png" style="width:75.0%;height:75.0%" />
 
 ### Phylogeny Heatmap
 
@@ -1188,21 +1208,25 @@ You could also use your phylogeny as the tree for the heatmap…
 Tree<-read.tree(file="./example_data/tree.nwk")
 
 # Toxin Transcripts
-phylo.heatmap(Tree, t(TPM_df2_log_tox[,4:11]), fsize=c(1,0.8,1), standardize=F, 
+png("figures/toxin_transcript_phyloheatmap.png", width=720, height=480)
+phylo.heatmap(Tree, t(TPM_df2_log_tox[,4:11]), fsize=c(1,0.8,1), standardize=F, labels=F,
               split=c(0.3,0.7), ylim=c(-0.25,1.25), grid=T,
               colors=colorRampPalette(rev(brewer.pal(n = 7,name="RdYlBu")))(100))
+invisible(dev.off())
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-49-1.png)
+<img src="./figures/toxin_transcript_phyloheatmap.png" style="width:50.0%;height:50.0%" />
 
 ``` r
 # Toxin Classes
+png("figures/toxin_class_phyloheatmap.png", width=720, height=480)
 phylo.heatmap(Tree, t(TPM_class_df_log_tox[,3:10]), fsize=c(1,0.8,1), standardize=F, 
               split=c(0.3,0.7), ylim=c(-0.25,1.25), grid=T,
               colors=colorRampPalette(rev(brewer.pal(n = 7,name="RdYlBu")))(100))
+invisible(dev.off())
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-49-2.png)
+<img src="./figures/toxin_class_phyloheatmap.png" style="width:50.0%;height:50.0%" />
 
 ### PCA
 
@@ -1212,35 +1236,18 @@ What about a PCA…
 PCA <- prcomp(as.data.frame(t(clr(TPM_df2[,4:11]))), center=TRUE, scale=TRUE)
 PCA_df<-data.frame(metadata,PCA$x)
 
-plot(PCA, type='l')
-```
-
-![](README_files/figure-markdown_github/unnamed-chunk-50-1.png)
-
-``` r
-summary(PCA)
-```
-
-    ## Importance of components:
-    ##                            PC1     PC2     PC3      PC4      PC5      PC6      PC7       PC8
-    ## Standard deviation     26.4264 19.5417 18.1140 14.01046 13.28532 12.14439 10.50577 1.641e-14
-    ## Proportion of Variance  0.3425  0.1873  0.1609  0.09627  0.08656  0.07233  0.05413 0.000e+00
-    ## Cumulative Proportion   0.3425  0.5298  0.6907  0.78698  0.87354  0.94587  1.00000 1.000e+00
-
-``` r
+#plot(PCA, type='l')
+#summary(PCA)
 PC1<-round((PCA$sdev^2/sum(PCA$sdev^2))*100,2)[1]
 PC2<-round((PCA$sdev^2/sum(PCA$sdev^2))*100,2)[2]
-ggscatter(PCA_df,"PC1","PC2",color="NontoxPhylo",fill="NontoxPhylo",size=8,
+png("figures/toxin_PCA.png", width=480, height=480)
+invisible(ggscatter(PCA_df,"PC1","PC2",color="NontoxPhylo",fill="NontoxPhylo",size=8,
           ellipse = T, ellipse.level = 0.95, ellipse.type = "norm",
-          xlab = paste0("PC1 (",PC1,"%)"), ylab=paste0("PC2 (",PC2,"%)"))
+          xlab = paste0("PC1 (",PC1,"%)"), ylab=paste0("PC2 (",PC2,"%)")))
+invisible(dev.off())
 ```
 
-    ## Too few points to calculate an ellipse
-    ## Too few points to calculate an ellipse
-    ## Too few points to calculate an ellipse
-    ## Too few points to calculate an ellipse
-
-![](README_files/figure-markdown_github/unnamed-chunk-50-2.png)
+<img src="./figures/toxin_PCA.png" style="width:75.0%;height:75.0%" />
 
 Differential Expression
 -----------------------
