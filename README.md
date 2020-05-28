@@ -313,7 +313,7 @@ conda install parallel
 # Create a bioinformatics environment
 conda create -n bio # Create an environment named "bio"
 conda activate bio # Activate your "bio" environment
-conda install -y biopython bamtools bedtools blast bowtie2 bwa cd-hit emboss fastqc gatk4 jellyfish parallel pear picard pigz rsem samtools sra-tools trim-galore
+conda install -y biopython bamtools bedtools blast bowtie2 bwa cd-hit emboss fastqc gatk4 jellyfish parallel pear picard pigz rsem samtools sra-tools trim-galore hmmer
 conda deactivate # Deactivate your environment to exit
 
 # Create a Trinity environment
@@ -650,12 +650,15 @@ parallel -a list.txt -j 2 --verbose "echo {}
 ```
 
 For nontoxin annotation, we will take the Nontoxin output from
-`Venomancer` (`Nontoxins_contigs.fasta`) and use `Venomancer`’s
+`Venomancer` (`Nontoxins_contigs.fasta`) and use [CodAn](https://github.com/pedronachtigall/CodAn) with `Venomancer`’s
 `NonToxins_annotator.py`. The `NonToxins_annotator.py` uses
 [CodAn](https://github.com/pedronachtigall/CodAn) to predict coding
-sequence (CDS) regions from the contigs followed by `blast`, `BUSCO`
-(optional), and `Pfam` (optional) to annotate the predicted CDSs,
-keeping uncharacterized proteins for potential novel toxin discovery.
+sequence (CDS) regions from the contigs, by using its [VERTEBRATE model](https://github.com/pedronachtigall/CodAn/blob/master/models/VERT_full.zip), followed by `blast`, `BUSCO`
+(optional), and `Pfam` (optional) to annotate the predicted CDSs by using the [`NonToxins_annotator.py`](https://github.com/pedronachtigall/Venomancer/tree/master/scripts/NonToxins_Annotator.py). This step keeps the uncharacterized proteins for potential novel toxin discovery.
+	- download the SwissprotDB ("swissprot.tar.gz") from the NCBI ftp site (ftp://ftp.ncbi.nlm.nih.gov/blast/db/). Decompress it `tar -xvf swissprot.tar.gz`.
+	- if the user wants, more than one proteinDB can be set in the `-b` option by using a comma "," separating the DBs (e.g., path/to/db1,path/to/db2,...,path/to/dbn).
+	- (Optionally) donwload the desired BUSCO models [here](https://busco.ezlab.org/busco_v4_data.html) and decompress the odb with `tar -xvf busco_odb.tar.gz`
+	- (Optionally) download the Pfam models with the link "ftp://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz" and decompress with `gzip -d Pfam-A.hmm.gz`
 
 ``` bash
 parallel -a list.txt -j 2 --verbose "echo {}
@@ -663,7 +666,11 @@ parallel -a list.txt -j 2 --verbose "echo {}
   mkdir 09_nontoxins
   mv 08_venomancer/{}.venomancer_NonToxins_contigs.fasta 09_nontoxins/
   cd 09_nontoxins
-  NonToxins_annotator.py -i {}.venomancer_NonToxins_contigs.fasta -o {}_Nontoxins.fasta"
+  unzip path/to/CodAn/models/VERT_full.zip
+  codan.py -t {}.venomancer_NonToxins_contigs.fasta -m VERT_full/ -o {}_NonToxins_codan
+  mv {}_NonToxins_codan/ORF_sequences.fasta {}_NonToxins_CDS.fasta
+  NonToxins_Annotator.py -t {}_NonToxins_CDS.fasta -d path/to/swissprot -b path/to/BUSCO/odb -p path/to/Pfam-A.hmm
+  mv Annotation_output/annotated.fa {}_NonToxins_annotated.fasta
 conda deactivate
 ```
 
@@ -674,7 +681,7 @@ in preparation for checking for chimeras
 parallel -a list.txt -j 2 --verbose "echo {}
   cd {}
   mkdir 10_CompleteAnnotation
-  cat 08_venomancer/{}_Toxins.fasta 09_nontoxins/{}_Nontoxins.fasta > 10_CompleteAnnotation/{}_annotated.fasta"
+  cat 08_venomancer/{}_Toxins.fasta 09_nontoxins/{}_NonToxins_annotated.fasta > 10_CompleteAnnotation/{}_annotated.fasta
 ```
 
 Now you can skip down to the section on [Removing Chimeras](#Chimeras)!
